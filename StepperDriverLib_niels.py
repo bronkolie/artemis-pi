@@ -1,8 +1,8 @@
 """https://tutorials-raspberrypi.com/how-to-control-a-stepper-motor-with-raspberry-pi-and-l293d-uln2003a/"""
-coil_A_pin = 4 # pink
-coil_B_pin = 27 # blue
-coil_C_pin = 17 # orange
-coil_D_pin = 22 # yellow
+coil_A_pin = 19 # pink
+coil_B_pin = 13 # blue
+coil_C_pin = 6 # orange
+coil_D_pin = 5 # yellow
 
 
 import RPi.GPIO as GPIO
