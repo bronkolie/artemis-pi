@@ -1,10 +1,20 @@
-import RPi.GPIO as GPIO           # import RPi.GPIO module  
-from time import sleep
+import RPi.GPIO as GPIO
+import time
 
+# Set the GPIO mode and pin number
+GPIO.setmode(GPIO.BCM)
+PWM_PIN = 17
 
-GPIO.setmode(GPIO.BCM)            # choose BCM or BOARD  
-GPIO.setup(6, GPIO.OUT) # set a port/pin as an output   
-while True:
-    GPIO.output(6, 1)       # set port/pin value to 1/GPIO.HIGH/True  
-    GPIO.output(6, 0)       # set port/pin value to 0/GPIO.LOW/False  
-    sleep(0.002)
+# Setup PWM pin
+GPIO.setup(PWM_PIN, GPIO.IN)
+
+try:
+    while True:
+        # Read the PWM duty cycle
+        duty_cycle = GPIO.input(PWM_PIN)
+        print("PWM Duty Cycle:", duty_cycle)
+        time.sleep(0.5)  # Wait for a short time before reading again
+
+except KeyboardInterrupt:
+    # Clean up GPIO on Ctrl+C exit
+    GPIO.cleanup()
