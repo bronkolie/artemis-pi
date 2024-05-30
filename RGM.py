@@ -2,7 +2,6 @@
 #IR sensor activeert hovercraft
 
 import RPi.GPIO as GPIO
-import time
 import time, board, busio
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
@@ -40,6 +39,7 @@ ads = ADS.ADS1115(i2c)
 channels = []
 
 channels.append(AnalogIn(ads, ADS.P0))
+channels.append(AnalogIn(ads, ADS.P1))
 
 
 
@@ -69,13 +69,12 @@ def print_motion_sensor():
         # if voltage > 1.75:
         #     print(f"IR detected after {round(time.time() - start_time, 3)}s")
         #     break
-        if voltage > 2.2:
-            print(voltage)
-        time.sleep(0.025)
+        print(voltage)
+        time.sleep(0.001)
 
 def ir_led(low=True):
-    if low:GPIO.output(IR_LED, GPIO.LOW)
-    else: GPIO.output(IR_LED, GPIO.HIGH)
+    if low:GPIO.output(IR_LED_PIN, GPIO.LOW)
+    else: GPIO.output(IR_LED_PIN, GPIO.HIGH)
 
 
 
