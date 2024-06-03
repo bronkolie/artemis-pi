@@ -1,6 +1,3 @@
-#Knop activeert IR licht
-#IR sensor activeert hovercraft
-
 import RPi.GPIO as GPIO
 import time, board, busio
 import adafruit_ads1x15.ads1115 as ADS
@@ -8,7 +5,7 @@ from adafruit_ads1x15.analog_in import AnalogIn
 import threading
 import configparser
 
-config = configparser.ConfigParser()
+config = configparser.ConfigParser(inline_comment_prefixes="#")
 config.read('rgm.conf')
 
 
@@ -23,13 +20,15 @@ SDA_PIN = int(config['digital_pins']['sda'])
 SCL_PIN = int(config['digital_pins']['scl'])
 
 
-HOVERCRAFT_TIME = float(config['times']['hovercraft_time'])
-ROCKET_TIME = float(config['times']['rocket_time'])
+HOVERCRAFT_TIME = float(config['times']['hovercraft'])
+MIN_ROCKET_TIME = float(config['times']['min_rocket'])
 
 
 IR_TRIGGER_VOLTAGE = float(config['voltages']['ir_trigger_voltage'])
+LIGHT_TRIGGER_VOLTAGE = float(config['voltages']['light_trigger_voltage'])
 
 IMPACT_SENSOR_ANALOG_PIN = int(config['analog_pins']['impact_sensor'])
+LIGHT_SENSOR_ANALOG_PIN = int(config['analog_pins']['light_sensor'])
 
 
 ADC = True
@@ -105,6 +104,10 @@ def ir_led(low=True):
 
 def is_ir_detected():
     return channels[IMPACT_SENSOR_ANALOG_PIN].voltage > IR_TRIGGER_VOLTAGE
+
+def is_light_detected():
+    return channels[LIGHT_SENSOR_ANALOG_PIN].voltage < LIGHT_TRIGGER_VOLTAGE
+
    
 def check_ir():
     while True:
@@ -143,17 +146,33 @@ def check_impact():
 def start_rocket():
     print("Starting rocket...")
     GPIO.output(LED_PIN, GPIO.HIGH)
-    time.sleep(ROCKET_TIME)
+
+def stop_rocket():
     print("Stopping rocket...")
     GPIO.output(LED_PIN, GPIO.LOW)
+
+def check_light():
+    while True:
+        if is_light_detected():
+            print("Light Detected!")
+            stop_rocket()
+            return
+        if stop_detecting:
+            return
+        time.sleep(0.025)
+    
 
 def main():
     ir_detector = threading.Thread(target=check_ir)
     impact_detector = threading.Thread(target=check_impact)
+    light_detector = threading.Thread(target=check_light)
     ir_detector.start()
     impact_detector.start()
-    ir_detector.join()
     impact_detector.join()
+    time.sleep(MIN_ROCKET_TIME)
+    light_detector.start()
+    light_detector.join()
+    ir_detector.join()
 
 
 if __name__ == "__main__":
