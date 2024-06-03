@@ -5,18 +5,27 @@ import RPi.GPIO as GPIO
 import time, board, busio
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
+import threading
 
 BUTTON_PIN = 4
 IMPACT_SENSOR_PIN = 5
 IR_LED_PIN = 17
-ADC = False
+ADC = True
 IR_TRIGGER_VOLTAGE = 3
 RELAY_PIN = 8
+LED_PIN = 20
+MOTION_SENSOR_ANALOG_PIN = 0
+HOVERCRAFT_TIME = 3
+ROCKET_TIME = 3
+
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, GPIO.PUD_DOWN)
 GPIO.setup(IR_LED_PIN, GPIO.IN)
-
+GPIO.setup(RELAY_PIN, GPIO.OUT)
+GPIO.setup(IMPACT_SENSOR_PIN, GPIO.IN)
+GPIO.setup(LED_PIN, GPIO.OUT)
 
 
 def print_button():
@@ -65,8 +74,7 @@ def print_ir(length=0):
         if length != 0 and time.time() - start_time > length:
             return
 
-def amogus():
-    print("Aamogus")
+
 
 def ir_led(low=True):
     if low:
@@ -74,30 +82,68 @@ def ir_led(low=True):
     else:
         GPIO.output(IR_LED_PIN, GPIO.HIGH)
 
-def impact_sensor_listen():
-    # Set up the motion sensor GPIO pin
+def is_ir_detected():
+    return channels[MOTION_SENSOR_ANALOG_PIN].voltage > IR_TRIGGER_VOLTAGE
+   
+def check_ir():
+    while True:
+        if is_ir_detected():
+            print("IR Detected")
+            enable_hovercraft()
+            return
+        if stop_detecting:
+            return
+        time.sleep(0.025)
+    
+            
+def enable_hovercraft():
+    print("Activating hovercraft")
+    GPIO.output(RELAY_PIN, GPIO.HIGH)
+    time.sleep(HOVERCRAFT_TIME)
+    print("Stopping hovercraft")
+    GPIO.output(RELAY_PIN, GPIO.LOW)
 
-    GPIO.setup(IMPACT_SENSOR_PIN, GPIO.IN)
-    GPIO.setup(IMPACT_SENSOR_PIN, GPIO.IN)
-
-    def button_pressed_callback(channel):
-        print("Motion detected!")
-        amogus()
 
 
-    GPIO.add_event_detect(IMPACT_SENSOR_PIN, GPIO.RISING, callback=button_pressed_callback, bouncetime=500)
+def check_impact():
+    keep_checking_impact = True
+    def impact_detected_callback(channel):
+        print("Impact detected!")
+        start_rocket()
+        GPIO.remove_event_detect(IMPACT_SENSOR_PIN)
+        nonlocal keep_checking_impact
+        keep_checking_impact  = False
+        
+    GPIO.add_event_detect(IMPACT_SENSOR_PIN, GPIO.RISING, callback=impact_detected_callback, bouncetime=500)
+    while not stop_detecting and keep_checking_impact:
+        time.sleep(0.1)
 
 
+def start_rocket():
+    print("Starting rocket...")
+    GPIO.output(LED_PIN, GPIO.HIGH)
+    time.sleep(ROCKET_TIME)
+    print("Stopping rocket...")
+    GPIO.output(LED_PIN, GPIO.LOW)
 
 def main():
-    impact_sensor_listen()
-    input("Press enter to exit...\n")
-    
+    ir_detector = threading.Thread(target=check_ir)
+    impact_detector = threading.Thread(target=check_impact)
+    ir_detector.start()
+    impact_detector.start()
+    ir_detector.join()
+    impact_detector.join()
+
+
 if __name__ == "__main__":
     try:
+        stop_detecting = False
         main()
     except KeyboardInterrupt:
-        print("Keyboard interrupted. Exiting...")
+        stop_detecting = True
+        print("\nKeyboard interrupted. Exiting...")
     finally:
+        GPIO.output(RELAY_PIN, GPIO.LOW)
+        GPIO.output(LED_PIN, GPIO.LOW)
         GPIO.cleanup()
 

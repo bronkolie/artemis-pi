@@ -3,7 +3,7 @@ import time
 
 # Set the GPIO mode and pin number
 
-PIN = 8
+PIN = 20
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(PIN, GPIO.OUT)
 try:
