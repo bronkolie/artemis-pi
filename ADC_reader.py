@@ -28,7 +28,7 @@ try:
     while True:
         voltage = channels[2].voltage
         print(voltage)
-        time.sleep(0.001)
+        time.sleep(0.025)
 except KeyboardInterrupt:
     print("\nInterrupted. Exiting...")
 
