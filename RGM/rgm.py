@@ -27,7 +27,7 @@ MIN_ROCKET_TIME = float(config['times']['min_rocket'])
 IR_TRIGGER_VOLTAGE = float(config['voltages']['ir_trigger_voltage'])
 LIGHT_TRIGGER_VOLTAGE = float(config['voltages']['light_trigger_voltage'])
 
-IMPACT_SENSOR_ANALOG_PIN = int(config['analog_pins']['impact_sensor'])
+IR_SENSOR_ANALOG_PIN = int(config['analog_pins']['ir_sensor'])
 LIGHT_SENSOR_ANALOG_PIN = int(config['analog_pins']['light_sensor'])
 
 
@@ -103,7 +103,7 @@ def ir_led(low=True):
         GPIO.output(IR_LED_PIN, GPIO.HIGH)
 
 def is_ir_detected():
-    return channels[IMPACT_SENSOR_ANALOG_PIN].voltage > IR_TRIGGER_VOLTAGE
+    return channels[IR_SENSOR_ANALOG_PIN].voltage > IR_TRIGGER_VOLTAGE
 
 def is_light_detected():
     return channels[LIGHT_SENSOR_ANALOG_PIN].voltage < LIGHT_TRIGGER_VOLTAGE
