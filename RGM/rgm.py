@@ -24,18 +24,23 @@ HOVERCRAFT_TIME = float(config['times']['hovercraft'])
 MIN_ROCKET_TIME = float(config['times']['min_rocket'])
 
 
-IR_TRIGGER_VOLTAGE = float(config['voltages']['ir_trigger_voltage'])
-LIGHT_TRIGGER_VOLTAGE = float(config['voltages']['light_trigger_voltage'])
+IR_TRIGGER_VOLTAGE = float(config['trigger_voltages']['ir_sensor'])
+LIGHT_TRIGGER_VOLTAGE = float(config['trigger_voltages']['light_sensor'])
 
 IR_SENSOR_ANALOG_PIN = int(config['analog_pins']['ir_sensor'])
 LIGHT_SENSOR_ANALOG_PIN = int(config['analog_pins']['light_sensor'])
 
 
-ADC = True
+if HOVERCRAFT_TIME % 1 == 0:
+    HOVERCRAFT_TIME = int(HOVERCRAFT_TIME)
+
+class WrongWiringException(Exception):
+    def __init__(self, message="The ADC was wired incorrectly.\nSDA must be connected to GPIO pin 2 and SCL must be connected to GPIO pin 3"):
+        self.message = message
+        super().__init__(self.message)
 
 if SDA_PIN != 2 or SCL_PIN != 3:
-    raise Exception("The ADC was wired incorrectly.\nSDA must be connected to GPIO pin 2 and SCL must be connected to GPIO pin 3")
-
+    raise WrongWiringException()
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 GPIO.setmode(GPIO.BCM)
@@ -60,49 +65,21 @@ def print_button():
 
 
 
-if ADC:
-    # Create the I2C bus (I2C must be ENABLED on the Pi!!)
-    i2c = busio.I2C(board.SCL, board.SDA)
-
-    # Create the ADC object using the I2C bus
-    ads = ADS.ADS1115(i2c)
-
-    channels = []
-
-    channels.append(AnalogIn(ads, ADS.P0))
-    channels.append(AnalogIn(ads, ADS.P1))
-    channels.append(AnalogIn(ads, ADS.P2))
-    channels.append(AnalogIn(ads, ADS.P3))
 
 
+i2c = busio.I2C(board.SCL, board.SDA)
+ads = ADS.ADS1115(i2c)
+
+channels = []
+channels.append(AnalogIn(ads, ADS.P0))
+channels.append(AnalogIn(ads, ADS.P1))
+channels.append(AnalogIn(ads, ADS.P2))
+channels.append(AnalogIn(ads, ADS.P3))
 
 
-def print_ir(length=0):
-    print("Waiting for IR light...")
-    start_time = time.time()
-    while True:
-        
-        time.sleep(0.025)
-        voltage = channels[0].voltage
-        print(voltage)
-        # if voltage > IR_TRIGGER_VOLTAGE:
-        #     # print(voltage)
-        #     print(f"IR detected after {round(time.time() - start_time, 3)}s")
-        #     break
-
-
-        if length != 0 and time.time() - start_time > length:
-            return
-
-
-
-def ir_led(low=True):
-    if low:
-        GPIO.output(IR_LED_PIN, GPIO.LOW)
-    else:
-        GPIO.output(IR_LED_PIN, GPIO.HIGH)
 
 def is_ir_detected():
+    # print(channels[IR_SENSOR_ANALOG_PIN].voltage)
     return channels[IR_SENSOR_ANALOG_PIN].voltage > IR_TRIGGER_VOLTAGE
 
 def is_light_detected():
@@ -112,8 +89,12 @@ def is_light_detected():
 def check_ir():
     while True:
         if is_ir_detected():
-            print("IR Detected")
+            print("IR detected!")
+            print("Activating hovercraft...")
             enable_hovercraft()
+            time.sleep(HOVERCRAFT_TIME)
+            print(f"Stopping hovercraft after {HOVERCRAFT_TIME}s...")
+            disable_hovercraft()
             return
         if stop_detecting:
             return
@@ -121,13 +102,11 @@ def check_ir():
     
             
 def enable_hovercraft():
-    print("Activating hovercraft")
     GPIO.output(RELAY_PIN, GPIO.HIGH)
-    time.sleep(HOVERCRAFT_TIME)
-    print("Stopping hovercraft")
+
+
+def disable_hovercraft():
     GPIO.output(RELAY_PIN, GPIO.LOW)
-
-
 
 def check_impact():
     keep_checking_impact = True
@@ -154,7 +133,7 @@ def stop_rocket():
 def check_light():
     while True:
         if is_light_detected():
-            print("Light Detected!")
+            print("Rocket detected!")
             stop_rocket()
             return
         if stop_detecting:
