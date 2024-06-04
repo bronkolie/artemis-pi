@@ -90,7 +90,7 @@ def check_ir():
         time.sleep(0.025)
 
 def check_light():
-
+    same = 0
     while True:
         if is_light_detected():
             same += 1
