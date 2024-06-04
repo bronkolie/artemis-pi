@@ -18,9 +18,10 @@ BUTTON_PIN = int(config['digital_pins']['button'])
 IMPACT_SENSOR_PIN = int(config['digital_pins']['impact_sensor'])
 IR_LED_PIN = int(config['digital_pins']['ir_led'])
 RELAY_PIN = int(config['digital_pins']['relay'])
-LED_PIN = int(config['digital_pins']['led'])
+ROCKET_PIN = int(config['digital_pins']['rocket'])
 SDA_PIN = int(config['digital_pins']['sda'])
 SCL_PIN = int(config['digital_pins']['scl'])
+LED_PIN = int(config['digital_pins']['led'])
 
 
 HOVERCRAFT_TIME = float(config['times']['hovercraft'])
@@ -49,10 +50,11 @@ if SDA_PIN != 2 or SCL_PIN != 3:
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(BUTTON_PIN, GPIO.IN, GPIO.PUD_DOWN)
+# GPIO.setup(BUTTON_PIN, GPIO.IN, GPIO.PUD_DOWN)
 GPIO.setup(IR_LED_PIN, GPIO.IN)
 GPIO.setup(RELAY_PIN, GPIO.OUT)
 GPIO.setup(IMPACT_SENSOR_PIN, GPIO.IN)
+GPIO.setup(ROCKET_PIN, GPIO.OUT)
 GPIO.setup(LED_PIN, GPIO.OUT)
 
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -129,9 +131,11 @@ def check_impact():
 def start_rocket():
     print("Starting rocket...")
     GPIO.output(LED_PIN, GPIO.HIGH)
+    GPIO.output(ROCKET_PIN, GPIO.HIGH)
 
 def stop_rocket():
     print("Stopping rocket...")
+    GPIO.output(ROCKET_PIN, GPIO.LOW)
     GPIO.output(LED_PIN, GPIO.LOW)
 
 
@@ -144,9 +148,11 @@ def main():
     ir_detector.start()
     impact_detector.start()
     impact_detector.join()
+    
     time.sleep(MIN_ROCKET_TIME)
     light_detector.start()
     light_detector.join()
+    
     ir_detector.join()
 
 
@@ -159,6 +165,7 @@ if __name__ == "__main__":
         print("\nKeyboard interrupted. Exiting...")
     finally:
         GPIO.output(RELAY_PIN, GPIO.LOW)
+        GPIO.output(ROCKET_PIN, GPIO.LOW)
         GPIO.output(LED_PIN, GPIO.LOW)
         GPIO.cleanup()
 

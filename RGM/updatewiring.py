@@ -11,7 +11,7 @@ BUTTON_PIN = config['digital_pins']['button']
 IMPACT_SENSOR_PIN = config['digital_pins']['impact_sensor']
 IR_LED_PIN = config['digital_pins']['ir_led']
 RELAY_PIN = config['digital_pins']['relay']
-LED_PIN = config['digital_pins']['led']
+ROCKET_PIN = config['digital_pins']['rocket']
 SDA_PIN = config['digital_pins']['sda']
 SCL_PIN = config['digital_pins']['scl']
 
@@ -26,12 +26,12 @@ class WrongWiringException(Exception):
 if int(SDA_PIN) != 2 or int(SCL_PIN) != 3:
     raise WrongWiringException()
 
-schematic = (f"""Pi:      ADC:         Impact sensor:         Relay:        LED:        IR sensor     1MOhm resistor       Light sensor     Button:      IR LED:
+schematic = (f"""Pi:      ADC:         Impact sensor:         Relay:     ROCKET:        IR sensor     1MOhm resistor       Light sensor     Button:      IR LED:
 {SDA_PIN} ------ SDA
 {SCL_PIN} ------ SCL           
 {IMPACT_SENSOR_PIN} ----------------------- OUT
 {RELAY_PIN} ------------------------------------------- SIG
-{LED_PIN} -------------------------------------------------------- G+
+{ROCKET_PIN} -------------------------------------------------------- G+
          A{IR_SENSOR_ANALOG_PIN} ------------------------------------------------------------- AOUT
          A{LIGHT_SENSOR_ANALOG_PIN} ----------------------------------------------------------------------------- 1
                                                                                           2 ------------------ OUT    
