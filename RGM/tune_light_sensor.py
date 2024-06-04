@@ -20,6 +20,7 @@ def setup():
 
 
     LIGHT_SENSOR_ANALOG_PIN = int(config['analog_pins']['light_sensor'])
+    LED_PIN = int(config['digital_pins']['led'])
 
 
     class WrongWiringException(Exception):
@@ -40,28 +41,32 @@ def setup():
     channels.append(AnalogIn(ads, ADS.P2))
     channels.append(AnalogIn(ads, ADS.P3))
 
-    return LIGHT_TRIGGER_VOLTAGE, LIGHT_SENSOR_ANALOG_PIN, channels
+    return LIGHT_TRIGGER_VOLTAGE, LIGHT_SENSOR_ANALOG_PIN, channels, LED_PIN
 
 
 def print_voltage(LIGHT_TRIGGER_VOLTAGE, LIGHT_SENSOR_ANALOG_PIN, channels):
     voltage = channels[LIGHT_SENSOR_ANALOG_PIN].voltage
     if voltage > LIGHT_TRIGGER_VOLTAGE:
-        print(f"No rocket detected at {voltage}v")
+        print(f"{voltage}V")
     else:
-         print(f"Rocket detected at {voltage}v")
+         print(f"{voltage}V")
 
 def main():
-    LIGHT_TRIGGER_VOLTAGE, LIGHT_SENSOR_ANALOG_PIN, channels = setup()
+    LIGHT_TRIGGER_VOLTAGE, LIGHT_SENSOR_ANALOG_PIN, channels, LED_PIN = setup()
+    GPIO.setup(LED_PIN, GPIO.OUT)
+    GPIO.output(LED_PIN, GPIO.HIGH)
     start = time.time()
     while True:
         print_voltage(LIGHT_TRIGGER_VOLTAGE, LIGHT_SENSOR_ANALOG_PIN, channels)
         if time.time() - start > 0.5:
             start = time.time()
-            LIGHT_TRIGGER_VOLTAGE, LIGHT_SENSOR_ANALOG_PIN, channels = setup()
+            LIGHT_TRIGGER_VOLTAGE, LIGHT_SENSOR_ANALOG_PIN, channels, LED_PIN = setup()
         time.sleep(0.025)
 
 try:
     main()
 except KeyboardInterrupt:
     print("\nInterrupted. Exiting...")
+finally:
+    GPIO.cleanup()
         

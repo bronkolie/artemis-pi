@@ -22,6 +22,7 @@ ROCKET_PIN = int(config['digital_pins']['rocket'])
 SDA_PIN = int(config['digital_pins']['sda'])
 SCL_PIN = int(config['digital_pins']['scl'])
 LED_PIN = int(config['digital_pins']['led'])
+BUZZER_PIN = int(config['digital_pins']['buzzer'])
 
 
 HOVERCRAFT_TIME = float(config['times']['hovercraft'])
@@ -56,6 +57,7 @@ GPIO.setup(RELAY_PIN, GPIO.OUT)
 GPIO.setup(IMPACT_SENSOR_PIN, GPIO.IN)
 GPIO.setup(ROCKET_PIN, GPIO.OUT)
 GPIO.setup(LED_PIN, GPIO.OUT)
+GPIO.setup(BUZZER_PIN, GPIO.OUT)
 
 i2c = busio.I2C(board.SCL, board.SDA)
 ads = ADS.ADS1115(i2c)
@@ -74,6 +76,7 @@ def is_ir_detected():
 
 def is_light_detected():
     voltage = channels[LIGHT_SENSOR_ANALOG_PIN].voltage
+    print(voltage)
     return voltage < LIGHT_TRIGGER_VOLTAGE
 
    
@@ -137,6 +140,10 @@ def stop_rocket():
     print("Stopping rocket...")
     GPIO.output(ROCKET_PIN, GPIO.LOW)
     GPIO.output(LED_PIN, GPIO.LOW)
+    time.sleep(0.5) #nog aanpassen
+    GPIO.output(BUZZER_PIN, GPIO.HIGH)
+    time.sleep(0.5)
+    GPIO.output(BUZZER_PIN, GPIO.LOW)
 
 
     
@@ -167,5 +174,6 @@ if __name__ == "__main__":
         GPIO.output(RELAY_PIN, GPIO.LOW)
         GPIO.output(ROCKET_PIN, GPIO.LOW)
         GPIO.output(LED_PIN, GPIO.LOW)
+        GPIO.output(BUZZER_PIN, GPIO.LOW)
         GPIO.cleanup()
 

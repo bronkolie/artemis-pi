@@ -47,9 +47,9 @@ def print_voltage(IR_TRIGGER_VOLTAGE, IR_SENSOR_ANALOG_PIN, channels):
 
     voltage = channels[IR_SENSOR_ANALOG_PIN].voltage
     if voltage > IR_TRIGGER_VOLTAGE:
-        print(f"IR detected at {voltage}v")
+        print(f"IR detected at {voltage}V")
     else:
-         print(f"No IR detected at {voltage}v")
+         print(f"No IR detected at {voltage}V")
 
 def main():
     IR_TRIGGER_VOLTAGE, IR_SENSOR_ANALOG_PIN, channels = setup()
