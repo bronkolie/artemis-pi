@@ -76,7 +76,7 @@ def is_ir_detected():
 
 def is_light_detected():
     voltage = channels[LIGHT_SENSOR_ANALOG_PIN].voltage
-    print(voltage)
+    # print(voltage)
     return voltage < LIGHT_TRIGGER_VOLTAGE
 
    
