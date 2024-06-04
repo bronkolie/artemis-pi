@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
-import time
 
-# Set the GPIO mode and pin number
+
+
 
 PIN = 26
 GPIO.setmode(GPIO.BCM)
