@@ -26,6 +26,8 @@ SCL_PIN = int(config['digital_pins']['scl'])
 HOVERCRAFT_TIME = float(config['times']['hovercraft'])
 MIN_ROCKET_TIME = float(config['times']['min_rocket'])
 
+LIGHT_SENSOR_SURE = float(config['misc']['light_sensor_sure'])
+
 
 IR_TRIGGER_VOLTAGE = float(config['trigger_voltages']['ir_sensor'])
 LIGHT_TRIGGER_VOLTAGE = float(config['trigger_voltages']['light_sensor'])
@@ -53,23 +55,6 @@ GPIO.setup(RELAY_PIN, GPIO.OUT)
 GPIO.setup(IMPACT_SENSOR_PIN, GPIO.IN)
 GPIO.setup(LED_PIN, GPIO.OUT)
 
-
-def print_button():
-    print("Waiting for button press...")
-    start = time.time()
-
-    while True:
-        # Read the button state
-        button_state = GPIO.input(BUTTON_PIN)
-        if button_state:
-            print(f"Button pressed after {(round(time.time() - start,3))}s")
-            break
-        time.sleep(0.025)
-
-
-
-
-
 i2c = busio.I2C(board.SCL, board.SDA)
 ads = ADS.ADS1115(i2c)
 
@@ -86,7 +71,8 @@ def is_ir_detected():
     return channels[IR_SENSOR_ANALOG_PIN].voltage > IR_TRIGGER_VOLTAGE
 
 def is_light_detected():
-    return channels[LIGHT_SENSOR_ANALOG_PIN].voltage < LIGHT_TRIGGER_VOLTAGE
+    voltage = channels[LIGHT_SENSOR_ANALOG_PIN].voltage
+    return voltage < LIGHT_TRIGGER_VOLTAGE
 
    
 def check_ir():
@@ -98,6 +84,21 @@ def check_ir():
             time.sleep(HOVERCRAFT_TIME)
             print(f"Stopping hovercraft after {HOVERCRAFT_TIME}s...")
             disable_hovercraft()
+            return
+        if stop_detecting:
+            return
+        time.sleep(0.025)
+
+def check_light():
+
+    while True:
+        if is_light_detected():
+            same += 1
+        else:
+            same = 0
+        if same >= LIGHT_SENSOR_SURE:
+            print("Rocket detected!")
+            stop_rocket()
             return
         if stop_detecting:
             return
@@ -133,15 +134,7 @@ def stop_rocket():
     print("Stopping rocket...")
     GPIO.output(LED_PIN, GPIO.LOW)
 
-def check_light():
-    while True:
-        if is_light_detected():
-            print("Rocket detected!")
-            stop_rocket()
-            return
-        if stop_detecting:
-            return
-        time.sleep(0.025)
+
     
 
 def main():
