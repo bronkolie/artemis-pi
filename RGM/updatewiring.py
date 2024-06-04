@@ -1,4 +1,7 @@
 import configparser
+import os
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 config = configparser.ConfigParser(inline_comment_prefixes="#")
@@ -27,7 +30,7 @@ schematic = (f"""Pi:      ADC:         Impact sensor:         Relay:        LED:
 {SDA_PIN} ------ SDA
 {SCL_PIN} ------ SCL           
 {IMPACT_SENSOR_PIN} ----------------------- OUT
-{RELAY_PIN} -------------------------------------------- SIG
+{RELAY_PIN} ------------------------------------------- SIG
 {LED_PIN} -------------------------------------------------------- G+
          A{IR_SENSOR_ANALOG_PIN} ------------------------------------------------------------- AOUT
          A{LIGHT_SENSOR_ANALOG_PIN} ----------------------------------------------------------------------------- 1

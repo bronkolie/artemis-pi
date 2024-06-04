@@ -3,7 +3,10 @@ import time, board, busio
 import adafruit_ads1x15.ads1115 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import configparser
+import os
 
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def setup():
     config = configparser.ConfigParser(inline_comment_prefixes="#")
