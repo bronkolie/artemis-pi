@@ -27,9 +27,9 @@ BUZZER_PIN = int(config['digital_pins']['buzzer'])
 
 HOVERCRAFT_TIME = float(config['times']['hovercraft'])
 MIN_ROCKET_TIME = float(config['times']['min_rocket'])
+BUZZER_WAIT = float(config['times']['buzzer_wait'])
+BUZZER_TIME = float(config['times']['buzzer_time'])
 
-LIGHT_SENSOR_SURE = float(config['misc']['light_sensor_sure'])
-IR_SENSOR_AVERAGE = float(config['misc']['ir_sensor_average'])
 
 
 IR_TRIGGER_VOLTAGE = float(config['trigger_voltages']['ir_sensor'])
@@ -37,6 +37,11 @@ LIGHT_TRIGGER_VOLTAGE = float(config['trigger_voltages']['light_sensor'])
 
 IR_SENSOR_ANALOG_PIN = int(config['analog_pins']['ir_sensor'])
 LIGHT_SENSOR_ANALOG_PIN = int(config['analog_pins']['light_sensor'])
+
+
+LIGHT_SENSOR_SURE = float(config['misc']['light_sensor_sure'])
+IR_SENSOR_AVERAGE = float(config['misc']['ir_sensor_average'])
+BUZZER_FREQ = float(config['misc']['buzzer_freq'])
 
 
 if HOVERCRAFT_TIME % 1 == 0:
@@ -91,6 +96,7 @@ def check_ir():
         average = sum(voltages)/len(voltages)
         if voltage - average > IR_TRIGGER_VOLTAGE:
             ir_detected()
+            return
         # if is_ir_detected():
             # return
         if stop_detecting:
@@ -99,10 +105,8 @@ def check_ir():
 
 def ir_detected():
     print("IR detected!")
-    print("Activating hovercraft...")
     enable_hovercraft()
     time.sleep(HOVERCRAFT_TIME)
-    print(f"Stopping hovercraft after {HOVERCRAFT_TIME}s...")
     disable_hovercraft()
 
 def check_light():
@@ -124,24 +128,27 @@ def check_light():
     
             
 def enable_hovercraft():
+    print("Activating hovercraft...")
     GPIO.output(RELAY_PIN, GPIO.HIGH)
 
 
 def disable_hovercraft():
+    print(f"Stopping hovercraft after {HOVERCRAFT_TIME}s...")
     GPIO.output(RELAY_PIN, GPIO.LOW)
 
 def check_impact():
     keep_checking_impact = True
     def impact_detected_callback(channel):
-        print("Impact detected!")
-        start_rocket()
         GPIO.remove_event_detect(IMPACT_SENSOR_PIN)
         nonlocal keep_checking_impact
         keep_checking_impact  = False
+        print("Impact detected!")
+        start_rocket()
         
     GPIO.add_event_detect(IMPACT_SENSOR_PIN, GPIO.RISING, callback=impact_detected_callback, bouncetime=500)
     while not stop_detecting and keep_checking_impact:
         time.sleep(0.1)
+
 
 
 def start_rocket():
@@ -153,9 +160,20 @@ def stop_rocket():
     print("Stopping rocket...")
     GPIO.output(ROCKET_PIN, GPIO.LOW)
     GPIO.output(LED_PIN, GPIO.LOW)
-    time.sleep(0.5) #nog aanpassen
+    time.sleep(BUZZER_WAIT)
+    # play_speaker(freq=BUZZER_FREQ, duration=BUZZER_TIME)
+
+def play_speaker(freq=1000, duration=2):
+    start = time.time()
+    while time.time() - start < duration and not stop_detecting:
+        GPIO.output(BUZZER_PIN, GPIO.HIGH)
+        time.sleep(0.5/freq)
+        GPIO.output(BUZZER_PIN, GPIO.LOW)
+        time.sleep(0.5/freq)
+
+def play_buzzer(duration):
     GPIO.output(BUZZER_PIN, GPIO.HIGH)
-    time.sleep(0.5)
+    time.sleep(duration)
     GPIO.output(BUZZER_PIN, GPIO.LOW)
 
 
