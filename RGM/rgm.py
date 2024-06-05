@@ -29,6 +29,7 @@ HOVERCRAFT_TIME = float(config['times']['hovercraft'])
 MIN_ROCKET_TIME = float(config['times']['min_rocket'])
 
 LIGHT_SENSOR_SURE = float(config['misc']['light_sensor_sure'])
+IR_SENSOR_AVERAGE = float(config['misc']['ir_sensor_average'])
 
 
 IR_TRIGGER_VOLTAGE = float(config['trigger_voltages']['ir_sensor'])
@@ -81,18 +82,28 @@ def is_light_detected():
 
    
 def check_ir():
+    voltages = []
     while True:
-        if is_ir_detected():
-            print("IR detected!")
-            print("Activating hovercraft...")
-            enable_hovercraft()
-            time.sleep(HOVERCRAFT_TIME)
-            print(f"Stopping hovercraft after {HOVERCRAFT_TIME}s...")
-            disable_hovercraft()
-            return
+        voltage = channels[IR_SENSOR_ANALOG_PIN].voltage
+        voltages.append(voltage)
+        if len(voltages) > IR_SENSOR_AVERAGE:
+            voltages.pop(0)
+        average = sum(voltages)/len(voltages)
+        if voltage - average > IR_TRIGGER_VOLTAGE:
+            ir_detected()
+        # if is_ir_detected():
+            # return
         if stop_detecting:
             return
         time.sleep(0.025)
+
+def ir_detected():
+    print("IR detected!")
+    print("Activating hovercraft...")
+    enable_hovercraft()
+    time.sleep(HOVERCRAFT_TIME)
+    print(f"Stopping hovercraft after {HOVERCRAFT_TIME}s...")
+    disable_hovercraft()
 
 def check_light():
     same = 0
@@ -108,6 +119,8 @@ def check_light():
         if stop_detecting:
             return
         time.sleep(0.025)
+
+        
     
             
 def enable_hovercraft():
