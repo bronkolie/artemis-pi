@@ -1,4 +1,4 @@
-Pi:      ADC:         Impact sensor:         Relay:     ROCKET:        IR sensor     1MOhm resistor       Light sensor     Button:      IR LED:      RGB LED:
+Pi:      ADC:         Impact sensor:         Relay:      ROCKET:       IR sensor     1MOhm resistor       Light sensor     Button:      IR LED:      RGB LED:
 2 ------ SDA
 3 ------ SCL           
 5 ----------------------- OUT

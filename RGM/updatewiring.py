@@ -26,7 +26,7 @@ class WrongWiringException(Exception):
 if int(SDA_PIN) != 2 or int(SCL_PIN) != 3:
     raise WrongWiringException()
 
-schematic = (f"""Pi:      ADC:         Impact sensor:         Relay:     ROCKET:        IR sensor     1MOhm resistor       Light sensor     Button:      IR LED:      RGB LED:
+schematic = (f"""Pi:      ADC:         Impact sensor:         Relay:      ROCKET:       IR sensor     1MOhm resistor       Light sensor     Button:      IR LED:      RGB LED:
 {SDA_PIN} ------ SDA
 {SCL_PIN} ------ SCL           
 {IMPACT_SENSOR_PIN} ----------------------- OUT
