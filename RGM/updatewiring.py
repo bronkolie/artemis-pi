@@ -14,6 +14,7 @@ RELAY_PIN = config['digital_pins']['relay']
 ROCKET_PIN = config['digital_pins']['rocket']
 SDA_PIN = config['digital_pins']['sda']
 SCL_PIN = config['digital_pins']['scl']
+LED_PIN = config['digital_pins']['led']
 
 IR_SENSOR_ANALOG_PIN = config['analog_pins']['ir_sensor']
 LIGHT_SENSOR_ANALOG_PIN = config['analog_pins']['light_sensor']
@@ -26,17 +27,18 @@ class WrongWiringException(Exception):
 if int(SDA_PIN) != 2 or int(SCL_PIN) != 3:
     raise WrongWiringException()
 
-schematic = (f"""Pi:      ADC:         Impact sensor:         Relay:      ROCKET:       IR sensor     1MOhm resistor       Light sensor     Button:      IR LED:      RGB LED:
+schematic = (f"""Pi:      ADC:         Impact sensor:         Relay:      ROCKET:       IR sensor     1MOhm resistor       Light sensor     Button:      IR LED:      RGB LED:      Light Sensor LED:
 {SDA_PIN} ------ SDA
 {SCL_PIN} ------ SCL           
 {IMPACT_SENSOR_PIN} ----------------------- OUT
 {RELAY_PIN} ------------------------------------------- SIG
 {ROCKET_PIN} -------------------------------------------------------- G+
+{LED_PIN} ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- +5V
          A{IR_SENSOR_ANALOG_PIN} ------------------------------------------------------------- AOUT
          A{LIGHT_SENSOR_ANALOG_PIN} ----------------------------------------------------------------------------- 1
                                                                                           2 ------------------ OUT    
                                                                                                                               OUT ---------- C -------- GND
-GND ---- GND ------------ GND ---------------- GND -------- GND ---------- GND ------------------------------- GND ---------- GND
+GND ---- GND ------------ GND ---------------- GND -------- GND ---------- GND ------------------------------- GND ---------- GND ---------------------------------------- GND
 5V ----- VDD ------------ +5V ---------------- VCC ----------------------- +5V ------------------------------- +5V
 3V -------------------------------------------------------------------------------------------------------------------------- +5V ---------- A  ------- R-G-B""")
 
