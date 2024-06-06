@@ -88,20 +88,22 @@ def is_light_detected():
    
 def check_ir():
     voltages = []
+    start = time.time()
     while True:
         voltage = channels[IR_SENSOR_ANALOG_PIN].voltage
         voltages.append(voltage)
         if len(voltages) > IR_SENSOR_AVERAGE:
             voltages.pop(0)
         average = sum(voltages)/len(voltages)
-        if voltage - average > IR_TRIGGER_VOLTAGE:
+        # print(voltage - average)
+        if voltage - average > IR_TRIGGER_VOLTAGE and time.time() - start > 2 :
             ir_detected()
             return
         # if is_ir_detected():
             # return
         if stop_detecting:
             return
-        time.sleep(0.025)
+        time.sleep(0.001)
 
 def ir_detected():
     print("IR detected!")
